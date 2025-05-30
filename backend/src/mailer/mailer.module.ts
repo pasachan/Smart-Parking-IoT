@@ -11,12 +11,12 @@ import { MailerService } from './mailer.service';
         host: 'smtp.zoho.eu', // replace with your SMTP server
         secure: true,
         auth: {
-          user: process.env.EMAIL_USER || 'info@okarusuvo.com',
-          pass: process.env.EMAIL_PASSWORD || 'Pass@14859857#',
+          user: process.env.EMAIL_USER ,
+          pass: process.env.EMAIL_PASSWORD,
         },
       },
       defaults: {
-        from: '"Smart Parking System" <info@okarusuvo.com>',
+        from: `"Smart Parking System" <${process.env.EMAIL_USER}>`,
       },
       template: {
         dir: join(__dirname, 'templates'), // This works if templates are present in dist/mailer/templates after build
