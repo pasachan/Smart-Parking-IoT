@@ -6,8 +6,8 @@ A complete IoT-based smart parking management system with real-time slot monitor
 
 ```
 Smart Parking IoT/
-├── smart-parking-backend/     # NestJS REST API
-├── smart-parking-frontend/    # React.js Web Application
+├── backend/                   # NestJS REST API
+├── frontend/                  # React.js Web Application
 ├── esp-code/                  # ESP32/Arduino Microcontroller Code
 └── database/                  # MySQL Database Schema
 ```
@@ -66,27 +66,28 @@ source database/schema.sql;
 ### 2. Backend Setup
 
 ```bash
-cd smart-parking-backend
+cd backend
 npm install
 
-# setup your database credentials in app.module.ts
-# Run migrations and start server
-npm run migration:run
-npm run start:dev
+# set mysql credential details in app.module.ts and change the mail credetials in mail.service.ts
+# start server
+
+nest start --watch 
 ```
 
-The backend will be available at `http://localhost:4333`
+The backend will be available at `http://localhost:3433`
 
 ### 3. Frontend Setup
 
 ```bash
-cd smart-parking-frontend
+cd frontend
 npm install
 
-# Set REACT_APP_API_URL=http://localhost:4333
+# Configure API endpoint
+# Set REACT_APP_API_URL=http://localhost:3433
 
 # Start development server
-npm start
+npm run start
 ```
 
 The frontend will be available at `http://localhost:3001`
@@ -137,23 +138,7 @@ The frontend will be available at `http://localhost:3001`
 
 ## 🔧 Hardware Setup
 
-### ESP32 Pin Configuration
-```
-RFID RC522:
-- SDA  -> GPIO 21
-- SCK  -> GPIO 18
-- MOSI -> GPIO 23
-- MISO -> GPIO 19
-- RST  -> GPIO 22
-- GND  -> GND
-- VCC  -> 3.3V
-
-Ultrasonic Sensor (per slot):
-- VCC  -> 5V
-- GND  -> GND
-- Trig -> GPIO (configurable)
-- Echo -> GPIO (configurable)
-```
+- Read the readme.md inside esp32 folder 
 
 ## 🚀 Deployment
 
@@ -175,13 +160,17 @@ npm run build
 # or use services like Vercel, Netlify
 ```
 
+### Database Deployment
+- Use cloud services like AWS RDS, Google Cloud SQL
+- Or deploy on VPS with proper backup strategies
+
+
 ## 👥 Authors
 
 - **Pareekshit Sachan** - *Initial work*
 
 ## 🙏 Acknowledgments
 
-- University course: ECD811S - Semester 7
 - IoT and embedded systems community
 - Open source libraries and frameworks used
 
