@@ -1,0 +1,354 @@
+# Smart Parking System API Documentation
+# This file can be used with REST Client extension in VS Code or similar tools
+
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+# ============================================================================
+# USER ENDPOINTS
+# ============================================================================
+
+###
+# @name registerUser
+# Register a new user with RFID tag
+POST {{baseUrl}}/users/register
+Content-Type: {{contentType}}
+
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "uid": "ABCD1234"
+}
+
+###
+# @name getAllUsers
+# Get all users in the system
+GET {{baseUrl}}/users
+
+###
+# @name getUserById
+# Get user by ID
+GET {{baseUrl}}/users/1
+
+###
+# @name getUserByRfid
+# Get user by RFID tag
+GET {{baseUrl}}/users/rfid/ABCD1234
+
+# ============================================================================
+# SLOT ENDPOINTS
+# ============================================================================
+
+###
+# @name createSlot
+# Create a new parking slot
+POST {{baseUrl}}/slots
+Content-Type: {{contentType}}
+
+{
+  "slot_number": "A1"
+}
+
+###
+# @name getAllSlots
+# Get all parking slots
+GET {{baseUrl}}/slots
+
+###
+# @name getAvailableSlots
+# Get all available slots
+GET {{baseUrl}}/slots/available
+
+###
+# @name getSlotById
+# Get slot by ID
+GET {{baseUrl}}/slots/1
+
+###
+# @name setSlotOccupied
+# Set slot to occupied (manual override)
+PATCH {{baseUrl}}/slots/1/occupy
+Content-Type: {{contentType}}
+
+{
+  "occupied": true
+}
+
+###
+# @name searchAvailableSlots
+# Search for available slots by time period
+POST {{baseUrl}}/slots/search
+Content-Type: {{contentType}}
+
+{
+  "startTime": "{{$datetime iso8601 1 hour}}",
+  "endTime": "{{$datetime iso8601 5 hour}}"
+}
+
+# ============================================================================
+# BOOKING ENDPOINTS
+# ============================================================================
+
+###
+# @name createBooking
+# Create a new booking
+POST {{baseUrl}}/bookings
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "slotId": 1,
+  "rfIdTagId": "ABCD1234",
+  "startTime": "2023-05-20T14:00:00.000Z",
+  "endTime": "2023-05-20T16:00:00.000Z"
+}
+
+###
+# @name getAllBookings
+# Get all bookings
+GET {{baseUrl}}/bookings
+
+###
+# @name getBookingById
+# Get booking by ID
+GET {{baseUrl}}/bookings/1
+
+###
+# @name getUserBookings
+# Get all bookings for a user
+GET {{baseUrl}}/bookings/user/1
+
+###
+# @name getBookingByRfid
+# Get active booking by RFID tag ID (detailed response)
+GET {{baseUrl}}/bookings/rfid/ABCD1234
+
+###
+# @name verifyRfidAccess
+# Verify RFID tag for gate/barrier access control (simplified response)
+GET {{baseUrl}}/bookings/verify-rfid/ABCD1234
+
+###
+# @name getActiveBookings
+# Get all currently active bookings
+GET {{baseUrl}}/bookings/status/active
+
+###
+# @name completeBooking
+# Mark a booking as completed
+PATCH {{baseUrl}}/bookings/1/complete
+
+###
+# @name cancelBooking
+# Cancel a booking
+DELETE {{baseUrl}}/bookings/1
+
+###
+# @name cleanupExpiredBookings
+# Maintenance: cleanup expired bookings
+POST {{baseUrl}}/bookings/maintenance/cleanup
+
+###
+# @name scanRfid
+# Scan RFID for entry/exit (automatically handles state transitions)
+PATCH {{baseUrl}}/bookings/scan-rfid/ABCD1234
+
+###
+# @name rfidStatus
+# Check RFID booking status (without changing state)
+GET {{baseUrl}}/bookings/rfid-status/ABCD1234
+
+# ============================================================================
+# TEST CASES (COMPLETE WORKFLOWS)
+# ============================================================================
+
+# === Test Case 1: Full Parking Flow ===
+
+###
+# Step 1: Register a user
+POST {{baseUrl}}/users/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "uid": "TEST1234"
+}
+
+###
+# Step 2: Create a slot
+POST {{baseUrl}}/slots
+Content-Type: {{contentType}}
+
+{
+  "slot_number": "TEST1"
+}
+
+###
+# Step 3: Make a booking
+# @name testBooking
+POST {{baseUrl}}/bookings
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "slotId": 1,
+  "rfIdTagId": "TEST1234",
+  "startTime": "{{$datetime iso8601 1 hour}}",
+  "endTime": "{{$datetime iso8601 3 hour}}"
+}
+
+###
+# Step 4: Check booking with RFID (like at entrance)
+GET {{baseUrl}}/bookings/rfid/TEST1234
+
+###
+# Step 5: Complete booking (like when exiting)
+@bookingId = {{testBooking.response.body.id}}
+PATCH {{baseUrl}}/bookings/{{bookingId}}/complete
+
+# === Test Case 2: Check Slot Availability ===
+
+###
+# Step 1: Get all available slots
+GET {{baseUrl}}/slots/available
+
+###
+# Step 2: Try booking an already occupied slot (should fail)
+POST {{baseUrl}}/bookings
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "slotId": 2,  
+  "rfIdTagId": "TEST1234",
+  "startTime": "{{$datetime iso8601}}",
+  "endTime": "{{$datetime iso8601 2 hour}}"
+}
+
+# === Test Case 3: RFID Gate Access ===
+
+###
+# Step 1: Register a user
+POST {{baseUrl}}/users/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Gate Test User",
+  "email": "gate@example.com",
+  "uid": "GATE1234"
+}
+
+###
+# Step 2: Create a slot
+POST {{baseUrl}}/slots
+Content-Type: {{contentType}}
+
+{
+  "slot_number": "GATE1"
+}
+
+###
+# Step 3: Make a booking (with current time window)
+POST {{baseUrl}}/bookings
+Content-Type: {{contentType}}
+
+{
+  "userId": 3,
+  "slotId": 3,
+  "rfIdTagId": "GATE1234",
+  "startTime": "{{$datetime iso8601 -1 hour}}",
+  "endTime": "{{$datetime iso8601 3 hour}}"
+}
+
+###
+# Step 4: Test gate access with RFID verification (simplified response)
+GET {{baseUrl}}/bookings/verify-rfid/GATE1234
+
+###
+# Step 5: Complete the booking when the car leaves
+PATCH {{baseUrl}}/bookings/3/complete
+
+# === Test Case 4: Maintenance Operations ===
+
+###
+# Step 1: Set a slot to occupied (maintenance)
+PATCH {{baseUrl}}/slots/1/occupy
+Content-Type: {{contentType}}
+
+{
+  "occupied": true
+}
+
+###
+# Step 2: Clean up expired bookings
+POST {{baseUrl}}/bookings/maintenance/cleanup
+
+###
+# Step 3: Make slot available again
+PATCH {{baseUrl}}/slots/1/occupy
+Content-Type: {{contentType}}
+
+{
+  "occupied": false
+}
+
+# === Test Case 5: Searching Available Slots ===
+
+###
+# Step 1: Search for available slots
+POST {{baseUrl}}/slots/search
+Content-Type: {{contentType}}
+
+{
+  "startTime": "{{$datetime iso8601 1 day}}",
+  "endTime": "{{$datetime iso8601 1 day 8 hour}}"
+}
+
+###
+# Step 2: Book one of the available slots
+POST {{baseUrl}}/bookings
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "slotId": 1,
+  "rfIdTagId": "SEARCH1234",
+  "startTime": "{{$datetime iso8601 1 day}}",
+  "endTime": "{{$datetime iso8601 1 day 8 hour}}"
+}
+
+# === Test Case 6: Complete Check-In/Check-Out Flow ===
+
+###
+# Step 1: Create test booking
+POST {{baseUrl}}/bookings
+Content-Type: {{contentType}}
+
+{
+  "userId": 1,
+  "slotId": 1,
+  "rfIdTagId": "FLOW1234",
+  "startTime": "{{$datetime iso8601 -1 hour}}",
+  "endTime": "{{$datetime iso8601 3 hour}}"
+}
+
+###
+# Step 2: Check initial booking status
+GET {{baseUrl}}/bookings/rfid-status/FLOW1234
+
+###
+# Step 3: Scan RFID for entry
+PATCH {{baseUrl}}/bookings/scan-rfid/FLOW1234
+
+###
+# Step 4: Verify status changed to checked_in
+GET {{baseUrl}}/bookings/rfid-status/FLOW1234
+
+###
+# Step 5: Scan RFID for exit
+PATCH {{baseUrl}}/bookings/scan-rfid/FLOW1234
+
+###
+# Step 6: Verify status changed to completed
+GET {{baseUrl}}/bookings/rfid-status/FLOW1234
