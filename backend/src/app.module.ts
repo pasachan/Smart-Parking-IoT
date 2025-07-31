@@ -1,5 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BookingsModule } from './booking/booking.module';
 import { UserModule } from './user/user.module';
 import { SlotModule } from './slot/slot.module';
@@ -9,16 +10,24 @@ import { Slot } from './slot/slot.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: process.env.MYSQL_SERVER_PASSWORD || 'Pass@1895',
-      database: process.env.MYSQL_SERVER_DATABASE || 'parking',
-      entities: [User, Booking, Slot], // Add all your entities here
-      synchronize: true, 
-    }), 
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get('MYSQL_SERVER_ADDRESS') || 'localhost',
+        port: 3306,
+        username: configService.get('MYSQL_SERVER_USERNAME'),
+        password: configService.get('MYSQL_SERVER_PASSWORD'),
+        database: configService.get('MYSQL_SERVER_DATABASE'),
+        entities: [User, Booking, Slot],
+        synchronize: true,
+      }),
+      inject: [ConfigService],
+    }),
     UserModule,
     BookingsModule, 
     SlotModule
