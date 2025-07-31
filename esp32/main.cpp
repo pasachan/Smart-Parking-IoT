@@ -9,8 +9,8 @@
 #include <ESP32Servo.h>
 
 // WiFi credentials
-const char* ssid = "Your_WiFi_SSID";
-const char* password = "Your_WiFi_Password";
+const char* ssid = "Galaxy M35";
+const char* password = "12346789";
 
 String latestName = "";
 String latestSlot = "";

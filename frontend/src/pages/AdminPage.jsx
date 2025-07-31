@@ -11,7 +11,7 @@ import {
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 
-const API_BASE = 'https://okarusuvo.com/parking';
+const API_BASE = 'https://parking.okarusuvo.com/parking';
 
 const MainContainer = styled(Container)(({ theme }) => ({
   background: theme.palette.grey[100],

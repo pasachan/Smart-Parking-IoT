@@ -13,7 +13,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { styled } from '@mui/material/styles';
 
-const API_BASE = 'https://okarusuvo.com/parking';
+const API_BASE = 'https://parking.okarusuvo.com/parking';
 
 const steps = ['Select Booking Time', 'Enter Personal & RFID Details', 'Confirm Booking'];
 
