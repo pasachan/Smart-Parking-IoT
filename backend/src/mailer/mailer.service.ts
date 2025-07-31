@@ -39,7 +39,7 @@ export class MailerService {
     .header {
       background: linear-gradient(90deg, #1a73e8 0%, #4285f4 100%);
       color: #fff;
-      padding: 28px 0 18px 0;
+      padding: 28px 0 18px 0;₹
       border-radius: 10px 10px 0 0;
       text-align: center;
     }

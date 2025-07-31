@@ -14,8 +14,8 @@ import { Slot } from './slot/slot.entity';
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'password',
-      database: 'parking',
+      password: process.env.MYSQL_SERVER_PASSWORD || 'Pass@1895',
+      database: process.env.MYSQL_SERVER_DATABASE || 'parking',
       entities: [User, Booking, Slot], // Add all your entities here
       synchronize: true, 
     }), 

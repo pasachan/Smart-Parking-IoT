@@ -83,7 +83,7 @@ export class BookingService {
     const savedBooking = await this.bookingRepository.save(booking);
     
     // Send confirmation email
-    await this.mailerService.sendBookingConfirmation(savedBooking, slot);
+    await this.mailerService.sendBookingConfirmationMail(savedBooking.email, savedBooking);
     console.log("mail")
     return savedBooking;
   }
